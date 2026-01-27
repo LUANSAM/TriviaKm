@@ -253,6 +253,24 @@ def inject_user():
     return {"current_user": session.get("user")}
 
 
+# Evita que formulários fiquem em cache e reabram ao voltar no navegador
+@app.after_request
+def add_no_cache_headers(response):
+    no_cache_endpoints = {
+        "registrar_abastecimento",
+        "novo_relatorio",
+        "finalizar_relatorio",
+        "registrar_avaria",
+        "register",
+        "login",
+    }
+    if request.endpoint in no_cache_endpoints:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 @app.route("/assets/<path:filename>")
 def serve_public_asset(filename: str):
     return send_from_directory("assets", filename)
