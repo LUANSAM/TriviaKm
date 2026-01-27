@@ -1655,7 +1655,7 @@ def server_error(error):
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "0") == "1"
     print("=" * 60)
-    print("CONTROLE DE RODAGEM - TRIVIA TRENS")
+    print("TRIVIA KM - TRIVIA TRENS")
     print("=" * 60)
     print("\n[OK] Servidor iniciado")
     print(f"[OK] Porta: {int(os.getenv('PORT', '5000'))}")
