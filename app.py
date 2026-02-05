@@ -307,7 +307,7 @@ def login():
             user = auth_response.user
             profile = (
                 client.table("usuarios")
-                .select("id, nome, empresa, area, autorizado, role")
+                .select("id, nome, empresa, area, autorizado, role, notificacao")
                 .eq("id", user.id)
                 .single()
                 .execute()
@@ -325,6 +325,7 @@ def login():
             "empresa": profile_data.get("empresa"),
             "area": profile_data.get("area"),
             "role": role,
+            "notificacao": profile_data.get("notificacao", False),
         }
         flash("Bem-vindo!", "success")
         return redirect(url_for("dashboard"))
@@ -453,6 +454,17 @@ def load_admin_stats() -> dict:
     except Exception:
         pass
     return stats
+
+
+@app.route("/api/admin/stats", methods=["GET"])
+@login_required("admin")
+def api_admin_stats():
+    """API endpoint para atualizar stats do dashboard sem recarregar a página"""
+    try:
+        stats = load_admin_stats()
+        return stats, 200
+    except Exception as exc:
+        return {"error": str(exc)}, 400
 
 
 def load_open_viagens(client: Client) -> list[dict]:
@@ -640,6 +652,7 @@ def finalizar_relatorio(relatorio_id: str | None = None):
                 "entrega_at": datetime.now(timezone.utc).isoformat(),
             }
             client.table("relatorios").update(update_payload).eq("id", record["id"]).execute()
+            
             # Avarias agora são registradas separadamente via dashboard
             # process_avarias(
             #     client,
@@ -960,8 +973,8 @@ def process_avarias(
             )
         client.table("avaria").insert(
             {
-                "veiculoID": veiculo_id or relatorio_payload.get("veiculo_id"),
-                "userID": session["user"]["id"],
+                "veiculo_id": veiculo_id or relatorio_payload.get("veiculo_id"),
+                "user_id": session["user"]["id"],
                 "descricao": descricao or local,
                 "foto": foto_url,
             }
@@ -1212,9 +1225,9 @@ def historico_avarias():
 def lista_usuarios():
     client = require_supabase()
     user = session.get("user") or {}
-    query = client.table("usuarios").select("id, nome, email, empresa, area, autorizado, created_at, role")
+    query = client.table("usuarios").select("id, nome, email, empresa, area, autorizado, created_at, role, notificacao")
 
-    if user.get("email") != "luan@cr.com":
+    if user.get("email") != "luan.sampaio@triviatrens.com.br":
         if user.get("empresa"):
             query = query.eq("empresa", user["empresa"])
         if user.get("area"):
@@ -1244,6 +1257,42 @@ def atualizar_status_usuario(user_id: str):
         return {"error": str(exc)}, 400
 
 
+@app.route("/admin/usuarios/<string:user_id>/notificacao", methods=["POST"])
+@login_required("admin")
+def atualizar_notificacao_usuario(user_id: str):
+    client = require_supabase()
+    try:
+        payload = request.get_json()
+        notificacao = payload.get("notificacao", False)
+        client.table("usuarios").update({"notificacao": notificacao}).eq("id", user_id).execute()
+        return {"success": True}, 200
+    except Exception as exc:  # pragma: no cover
+        return {"error": str(exc)}, 400
+
+
+@app.route("/admin/minha-notificacao", methods=["POST"])
+@login_required("admin")
+def atualizar_minha_notificacao():
+    """Permite que o admin atualize sua própria preferência de notificação"""
+    client = require_supabase()
+    user = session.get("user")
+    print(f"[NOTIFICACAO] User ID: {user.get('id') if user else 'None'}")
+    try:
+        payload = request.get_json()
+        notificacao = payload.get("notificacao", False)
+        print(f"[NOTIFICACAO] Alterando para: {notificacao}")
+        result = client.table("usuarios").update({"notificacao": notificacao}).eq("id", user["id"]).execute()
+        print(f"[NOTIFICACAO] Resultado: {result.data}")
+        # Atualiza a sessão
+        session["user"]["notificacao"] = notificacao
+        return {"success": True}, 200
+    except Exception as exc:  # pragma: no cover
+        print(f"[NOTIFICACAO] ERRO: {exc}")
+        return {"error": str(exc)}, 400
+    finally:
+        session.modified = True
+
+
 @app.route("/admin/usuarios/<string:user_id>/edit", methods=["POST"])
 @login_required("admin")
 def editar_usuario(user_id: str):
@@ -1265,7 +1314,7 @@ def editar_usuario(user_id: str):
         }
 
         current_user = session.get("user") or {}
-        if current_user.get("email") == "luan@cr.com" and role:
+        if current_user.get("email") == "luan.sampaio@triviatrens.com.br" and role:
             if role not in {"admin", "user"}:
                 return {"error": "Role inválido"}, 400
             update_payload["role"] = role
@@ -1579,6 +1628,15 @@ def registrar_avaria():
         local_list = request.form.getlist("avaria_local[]")
         fotos = request.files.getlist("avaria_foto[]")
         
+        # Busca informações do veículo para notificação
+        veiculo_info = None
+        try:
+            veiculo_data = client.table("veiculo").select("*").eq("id", veiculo_id).execute().data
+            if veiculo_data:
+                veiculo_info = veiculo_data[0]
+        except Exception:
+            pass
+        
         avarias_registradas = 0
         for idx, descricao in enumerate(descricao_list):
             descricao = descricao.strip()
@@ -1598,12 +1656,13 @@ def registrar_avaria():
             
             client.table("avaria").insert(
                 {
-                    "veiculoID": veiculo_id,
-                    "userID": session["user"]["id"],
+                    "veiculo_id": veiculo_id,
+                    "user_id": session["user"]["id"],
                     "descricao": descricao or local,
                     "foto": foto_url,
                 }
             ).execute()
+            
             avarias_registradas += 1
         
         if avarias_registradas > 0:
