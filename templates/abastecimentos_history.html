@@ -20,19 +20,63 @@
         cursor: pointer;
     }
     .icon-button:hover { background: #e8edf2; }
+    
+    /* Habilita scroll horizontal */
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .abastecimentos-table {
+        width: 100%;
+        table-layout: auto;
+    }
+    
+    .abastecimentos-table th,
+    .abastecimentos-table td {
+        white-space: nowrap;
+        padding: 12px 8px;
+    }
+    
+    /* Larguras específicas das colunas */
+    .abastecimentos-table .col-responsavel {
+        width: 25%;
+        min-width: 180px;
+    }
+    
+    .abastecimentos-table .col-veiculo {
+        width: 12%;
+        min-width: 100px;
+    }
+    
+    .abastecimentos-table .col-km {
+        width: 10%;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .abastecimentos-table .col-valor {
+        width: 12%;
+        min-width: 100px;
+        text-align: right;
+    }
+    
+    .abastecimentos-table .col-litros {
+        width: 10%;
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    .abastecimentos-table .col-nota {
+        width: 31%;
+        min-width: 150px;
+    }
+    
     .abastecimentos-table a {
         color: var(--primary-color);
     }
     .abastecimentos-table a:hover {
         text-decoration: underline;
-    }
-    .abastecimentos-table .col-responsavel,
-    .abastecimentos-table .col-veiculo,
-    .abastecimentos-table .col-km,
-    .abastecimentos-table .col-valor,
-    .abastecimentos-table .col-litros,
-    .abastecimentos-table .col-nota {
-        display: table-cell !important;
     }
     @media (max-width: 550px) {
         .abastecimentos-table .col-nota,
@@ -53,10 +97,77 @@
         }
     }
     @media print {
-        body, .card, .table-wrapper, table, th, td { background: #fff !important; color: #000 !important; }
-        .no-print, nav, header.site-header { display: none !important; }
-        .section-header { display: block; }
-        .icon-button { display: none !important; }
+        body, .card, .table-wrapper, table, th, td { 
+            background: #fff !important; 
+            color: #000 !important; 
+        }
+        .no-print, nav, header.site-header { 
+            display: none !important; 
+        }
+        .section-header { 
+            display: block; 
+            margin-bottom: 15px;
+        }
+        .section-header h2 {
+            font-size: 18px;
+        }
+        .icon-button { 
+            display: none !important; 
+        }
+        .table-wrapper {
+            overflow-x: visible;
+            margin: 0 -20px;
+            padding: 0 20px;
+        }
+        .abastecimentos-table {
+            width: 100%;
+            table-layout: fixed;
+            font-size: 14px;
+        }
+        .abastecimentos-table th,
+        .abastecimentos-table td {
+            padding: 8px 6px;
+            font-size: 14px;
+            word-wrap: normal;
+            white-space: normal;
+        }
+        .abastecimentos-table th {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .abastecimentos-table .col-responsavel {
+            width: 30%;
+        }
+        .abastecimentos-table .col-responsavel strong {
+            font-size: 14px;
+        }
+        .abastecimentos-table .col-responsavel div {
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        .abastecimentos-table .col-veiculo {
+            width: 13%;
+        }
+        .abastecimentos-table .col-km {
+            width: 9%;
+            text-align: center;
+        }
+        .abastecimentos-table .col-valor {
+            width: 13%;
+            text-align: right;
+        }
+        .abastecimentos-table .col-litros {
+            width: 12%;
+            text-align: center;
+        }
+        .abastecimentos-table .col-nota {
+            width: 23%;
+        }
+        /* Remove decoração de links na impressão */
+        .abastecimentos-table a {
+            color: #000 !important;
+            text-decoration: none !important;
+        }
     }
 </style>
 <section class="card">
