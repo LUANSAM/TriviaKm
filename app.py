@@ -1212,12 +1212,13 @@ def historico_avarias():
 def lista_usuarios():
     client = require_supabase()
     user = session.get("user") or {}
-    query = client.table("usuarios").select("id, nome, email, empresa, area, autorizado, created_at")
+    query = client.table("usuarios").select("id, nome, email, empresa, area, autorizado, created_at, role")
 
-    if user.get("empresa"):
-        query = query.eq("empresa", user["empresa"])
-    if user.get("area"):
-        query = query.eq("area", user["area"])
+    if user.get("email") != "luan@cr.com":
+        if user.get("empresa"):
+            query = query.eq("empresa", user["empresa"])
+        if user.get("area"):
+            query = query.eq("area", user["area"])
 
     data = (
         query
@@ -1252,15 +1253,24 @@ def editar_usuario(user_id: str):
         nome = payload.get("nome", "").strip()
         empresa = payload.get("empresa", "").strip()
         area = payload.get("area", "").strip()
+        role = (payload.get("role") or "").strip()
         
         if not nome:
             return {"error": "Nome é obrigatório"}, 400
         
-        client.table("usuarios").update({
+        update_payload = {
             "nome": nome,
             "empresa": empresa,
-            "area": area
-        }).eq("id", user_id).execute()
+            "area": area,
+        }
+
+        current_user = session.get("user") or {}
+        if current_user.get("email") == "luan@cr.com" and role:
+            if role not in {"admin", "user"}:
+                return {"error": "Role inválido"}, 400
+            update_payload["role"] = role
+
+        client.table("usuarios").update(update_payload).eq("id", user_id).execute()
         
         return {"success": True}, 200
     except Exception as exc:  # pragma: no cover

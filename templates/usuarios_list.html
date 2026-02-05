@@ -48,7 +48,7 @@
                         </td>
                         <td class="created-column">{{ formatted_date }}</td>
                         <td class="actions-cell">
-                            <button class="btn-icon btn-edit" title="Editar usuário" data-user-id="{{ usuario.id }}" data-nome="{{ usuario.nome }}" data-empresa="{{ usuario.empresa }}" data-area="{{ usuario.area }}">
+                            <button class="btn-icon btn-edit" title="Editar usuário" data-user-id="{{ usuario.id }}" data-nome="{{ usuario.nome }}" data-empresa="{{ usuario.empresa }}" data-area="{{ usuario.area }}" data-role="{{ usuario.role }}">
                                 ✏️
                             </button>
                             <button class="btn-icon btn-delete" title="Excluir usuário" data-user-id="{{ usuario.id }}" data-nome="{{ usuario.nome }}">
@@ -96,11 +96,21 @@
                     <option value="Sinalização">Sinalização</option>
                     <option value="Telecom">Telecom</option>
                     <option value="Engenharia">Engenharia</option>
-                    <option value="civil_vp">Civil/VP</option>
-                    <option value="oficinas">Oficinas</option>
-                    <option value="mro">MRO</option>
+                    <option value="Civil/VP">Civil/VP</option>
+                    <option value="Oficinas">Oficinas</option>
+                    <option value="MRO">MRO</option>
                 </select>
             </label>
+
+            {% if current_user and current_user.email == 'luan@cr.com' %}
+            <label>
+                <span>Perfil</span>
+                <select id="editRole" name="role">
+                    <option value="user">Usuário</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </label>
+            {% endif %}
             
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -289,11 +299,16 @@ document.querySelectorAll('.btn-edit').forEach(btn => {
         const nome = btn.dataset.nome;
         const empresa = btn.dataset.empresa;
         const area = btn.dataset.area;
+        const role = btn.dataset.role;
         
         document.getElementById('editUserId').value = userId;
         document.getElementById('editNome').value = nome;
         document.getElementById('editEmpresa').value = empresa;
         document.getElementById('editArea').value = area;
+        const roleField = document.getElementById('editRole');
+        if (roleField) {
+            roleField.value = role || 'user';
+        }
         
         openModal('editModal');
     });
@@ -307,14 +322,21 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
     const nome = document.getElementById('editNome').value;
     const empresa = document.getElementById('editEmpresa').value;
     const area = document.getElementById('editArea').value;
+    const roleField = document.getElementById('editRole');
+    const role = roleField ? roleField.value : null;
     
     try {
+        const payload = { nome, empresa, area };
+        if (roleField && role) {
+            payload.role = role;
+        }
+
         const response = await fetch(`/admin/usuarios/${userId}/edit`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nome, empresa, area }),
+            body: JSON.stringify(payload),
         });
         
         if (response.ok) {

@@ -28,6 +28,67 @@
     .print-header { display: none; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 0 1rem; margin-bottom: 1rem; border-bottom: 1px solid #d0d7de; }
     .print-brand { display: flex; flex-direction: column; gap: 0.15rem; }
     .print-title { margin: 0; font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+
+    /* Rolagem horizontal para todas as telas */
+    .table-wrapper {
+        overflow-x: auto !important;
+            width: 100%;
+    }
+    
+    .vehicles-table th,
+    .vehicles-table td {
+        white-space: nowrap !important;
+        }
+    
+        .vehicles-table {
+            min-width: 700px;
+            width: 100%;
+    }
+
+    /* Estilos responsivos para tabela de veículos em telas pequenas */
+    @media (max-width: 550px) {
+        .marca-column,
+        .tipo-column,
+        .created-column {
+            display: none !important;
+        }
+        
+        .vehicles-table {
+            min-width: 640px;
+        }
+        
+        /* Força nowrap mesmo em mobile */
+        .vehicles-table th,
+        .vehicles-table td {
+            white-space: nowrap !important;
+        }
+        
+        table thead th {
+            font-size: 0.75rem !important;
+            padding: 8px 4px !important;
+        }
+        
+        table tbody td {
+            padding: 8px 4px !important;
+            font-size: 0.85rem !important;
+        }
+        
+        .actions-col {
+            text-align: right !important;
+        }
+        
+        .actions-cell {
+            text-align: right !important;
+            padding-right: 4px !important;
+        }
+        
+        .actions-cell .btn-icon {
+            margin: 0 1px !important;
+            padding: 2px !important;
+            font-size: 0.95rem !important;
+        }
+    }
+
     .print-subtitle { margin: 0; font-size: 0.95rem; color: #475569; }
     .print-logo img { height: 42px; }
     @media print {
@@ -36,16 +97,19 @@
         .print-header { display: flex; }
         .print-title, .print-subtitle { color: #000; }
         .section-header { display: block; }
-        .vehicles-table { width: 100%; table-layout: fixed; }
+        .table-wrapper, .vehicles-table { width: 100% !important; min-width: 0 !important; }
+        .vehicles-table { table-layout: auto; }
         .vehicles-table th,
         .vehicles-table td {
-            padding: 8px 6px;
-            font-size: 0.85rem;
+            padding: 6px 4px;
+            font-size: 0.78rem;
             word-break: break-word;
             white-space: normal;
         }
-        .vehicles-table th { font-size: 0.82rem; }
-        .actions-col, .actions-cell { display: none !important; }
+        .vehicles-table th { font-size: 0.74rem; }
+        .created-column,
+        .actions-col,
+        .actions-cell { display: none !important; }
     }
 </style>
 
@@ -144,15 +208,12 @@
             <table class="vehicles-table">
                 <thead>
                     <tr>
-                        <th>Placa</th>
-                        <th>Modelo</th>
-                        <th>Marca</th>
-                        <th>Tipo</th>
-                        <th>Combustível</th>
-                        <th>Empresa</th>
-                        <th>Área</th>
+                        <th>Veículo</th>
+                        <th class="marca-column">Marca</th>
+                        <th class="tipo-column">Tipo</th>
+                        <th>Posto</th>
                         <th>KM rodado</th>
-                        <th>Criado em</th>
+                        <th class="created-column">Criado em</th>
                         <th class="actions-col">Ações</th>
                     </tr>
                 </thead>
@@ -174,15 +235,19 @@
                             {% endif %}
                         {% endif %}
                         <tr class="vehicle-row" data-foto-url="{{ veiculo.foto_url or '' }}" data-placa="{{ veiculo.placa }}" style="cursor: pointer;">
-                            <td>{{ veiculo.placa }}</td>
-                            <td>{{ veiculo.modelo }}</td>
-                            <td>{{ veiculo.marca or '-' }}</td>
-                            <td>{{ veiculo.tipo_label }}</td>
-                            <td>{{ veiculo.combustivel_label }}</td>
-                            <td>{{ veiculo.empresa or '-' }}</td>
-                            <td>{{ veiculo.area or '-' }}</td>
+                            <td>
+                                <div>{{ veiculo.placa }}</div>
+                                <div style="font-size: 0.85em; color: #8b93a7; margin-top: 2px;">{{ veiculo.modelo }}</div>
+                                <div style="font-size: 0.8em; color: #666; margin-top: 2px;">{{ veiculo.combustivel_label }}</div>
+                            </td>
+                            <td class="marca-column">{{ veiculo.marca or '-' }}</td>
+                            <td class="tipo-column">{{ veiculo.tipo_label }}</td>
+                            <td>
+                                <div>{{ veiculo.area or '-' }}</div>
+                                <div style="font-size: 0.85em; color: #666; margin-top: 2px;">{{ veiculo.empresa or '-' }}</div>
+                            </td>
                             <td>{{ (veiculo.km_rodado or 0)|int }} km</td>
-                            <td>{{ formatted_date }}</td>
+                            <td class="created-column">{{ formatted_date }}</td>
                             <td class="actions-cell">
                                 <button
                                     type="button"
