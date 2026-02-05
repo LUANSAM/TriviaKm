@@ -44,6 +44,7 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 REGISTER_COMPANIES = [
     {"id": "trivia_trens", "label": "Trivia Trens"},
     {"id": "tic_trens", "label": "Tic Trens"},
+    {"id": "metro_bh", "label": "Metrô BH"},
 ]
 
 REGISTER_AREAS = [

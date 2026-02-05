@@ -18,11 +18,10 @@
             <thead>
                 <tr>
                     <th>Nome</th>
-                    <th>E-mail</th>
-                    <th>Empresa</th>
-                    <th>Área</th>
+                    <th class="email-column">E-mail</th>
+                    <th>Posto</th>
                     <th>Autorizado</th>
-                    <th>Criado em</th>
+                    <th class="created-column">Criado em</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -36,16 +35,18 @@
                     {% endif %}
                     <tr>
                         <td>{{ usuario.nome }}</td>
-                        <td>{{ usuario.email }}</td>
-                        <td>{{ usuario.empresa }}</td>
-                        <td>{{ usuario.area }}</td>
+                        <td class="email-column">{{ usuario.email }}</td>
+                        <td>
+                            <div>{{ usuario.area }}</div>
+                            <div style="font-size: 0.85em; color: #666; margin-top: 2px;">{{ usuario.empresa }}</div>
+                        </td>
                         <td>
                             <select class="user-status-select" data-user-id="{{ usuario.id }}" data-current="{{ usuario.autorizado | lower }}">
                                 <option value="true" {% if usuario.autorizado %}selected{% endif %}>Sim</option>
                                 <option value="false" {% if not usuario.autorizado %}selected{% endif %}>Não</option>
                             </select>
                         </td>
-                        <td>{{ formatted_date }}</td>
+                        <td class="created-column">{{ formatted_date }}</td>
                         <td class="actions-cell">
                             <button class="btn-icon btn-edit" title="Editar usuário" data-user-id="{{ usuario.id }}" data-nome="{{ usuario.nome }}" data-empresa="{{ usuario.empresa }}" data-area="{{ usuario.area }}">
                                 ✏️
@@ -82,6 +83,7 @@
                     <option value="">Selecione a empresa...</option>
                     <option value="Trivia Trens">Trivia Trens</option>
                     <option value="Tic Trens">Tic Trens</option>
+                    <option value="metro_bh">Metrô BH</option>
                 </select>
             </label>
             
@@ -94,6 +96,9 @@
                     <option value="Sinalização">Sinalização</option>
                     <option value="Telecom">Telecom</option>
                     <option value="Engenharia">Engenharia</option>
+                    <option value="civil_vp">Civil/VP</option>
+                    <option value="oficinas">Oficinas</option>
+                    <option value="mro">MRO</option>
                 </select>
             </label>
             
@@ -125,6 +130,70 @@
 {% endblock %}
 
 {% block scripts %}
+<style>
+    @media (max-width: 550px) {
+        .email-column {
+            display: none !important;
+        }
+        .created-column {
+            display: none !important;
+        }
+        
+        /* Reduz o tamanho da fonte dos títulos das colunas */
+        table thead th {
+            font-size: 0.75rem !important;
+            padding: 8px 4px !important;
+        }
+        
+        /* Reduz o espaçamento entre os ícones de ação */
+        .actions-cell {
+            padding: 4px !important;
+        }
+        
+        .actions-cell .btn-icon {
+            margin: 0 2px !important;
+            padding: 4px !important;
+            font-size: 1rem !important;
+        }
+        
+        /* Ajusta as células da tabela */
+        table tbody td {
+            padding: 8px 4px !important;
+            font-size: 0.85rem !important;
+        }
+    }
+    
+    @media (max-width: 500px) {
+        /* Melhora distribuição de colunas em telas muito pequenas */
+        table thead th:last-child {
+            text-align: right !important;
+            white-space: nowrap !important;
+            width: 1% !important;
+        }
+        
+        td.actions-cell {
+            text-align: right !important;
+            white-space: nowrap !important;
+            width: 1% !important;
+            padding-right: 2px !important;
+        }
+        
+        .actions-cell .btn-icon {
+            margin: 0 1px !important;
+            padding: 2px !important;
+            font-size: 0.95rem !important;
+        }
+
+        /* Evita quebra de linha na coluna Posto e mantém rolagem horizontal */
+        .table-wrapper {
+            overflow-x: auto !important;
+        }
+        table th:nth-child(3),
+        table td:nth-child(3) {
+            white-space: nowrap !important;
+        }
+    }
+</style>
 <script>
 function updateSelectColor(select) {
     const isTrue = select.value === 'true';
