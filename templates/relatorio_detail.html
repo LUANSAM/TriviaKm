@@ -113,6 +113,8 @@
         </div>
         <div class="meta-item"><strong>Combustível Saída:</strong> {{ combustivel_saida or '-' }}</div>
         <div class="meta-item"><strong>Combustível Chegada:</strong> {{ combustivel_chegada or '-' }}</div>
+        <div class="meta-item"><strong>Km inicial:</strong> {{ cab_partida.km_inicial if cab_partida.km_inicial is not none else '-' }}</div>
+        <div class="meta-item"><strong>Km final:</strong> {{ cab_entrega.km_final if cab_entrega and cab_entrega.km_final is not none else '-' }}</div>
         <div class="meta-item"><strong>Percurso:</strong> {{ distancia_km if distancia_km is not none else '-' }}{% if distancia_km is not none %} km{% endif %}</div>
         <div class="meta-item"><strong>Trajeto:</strong> {{ cab_partida.trajeto or '-' }}</div>
     </div>
